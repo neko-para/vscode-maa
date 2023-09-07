@@ -1,0 +1,45 @@
+{
+  "name": "vscode-maa",
+  "displayName": "vscode-maa",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.81.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:maalog"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [],
+    "languages": [
+      {
+        "id": "maalog",
+        "aliases": [
+          "MAA日志",
+          "maalog"
+        ],
+        "extensions": [
+          ".log",
+          ".maalog"
+        ],
+        "firstLine": " \\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}\\]\\[[A-Z]{3}\\]\\[Px\\d+\\]\\[Tx\\d+\\]"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.81.0",
+    "@types/node": "20.2.5",
+    "typescript": "^5.1.3",
+    "@vscode/test-electron": "^2.3.2"
+  }
+}
