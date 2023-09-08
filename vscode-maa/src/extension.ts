@@ -22,6 +22,8 @@ export function activate(context: vscode.ExtensionContext) {
       }
     })
   )
+
+  context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider(documentSelector, lsp))
 }
 
 export function deactivate() {}

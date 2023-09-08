@@ -16,7 +16,7 @@ export const LanguageLegend = new vscode.SemanticTokensLegend(
 )
 
 const deco = vscode.window.createTextEditorDecorationType({
-  backgroundColor: 'rgba(255, 255, 255, 0.5)'
+  textDecoration: 'underline'
 })
 
 function isRowBegin(row: string) {
@@ -116,13 +116,105 @@ function getFullRow(doc: vscode.TextDocument, row: number) {
   while (!isRowBegin(doc.lineAt(begin).text)) {
     begin -= 1
   }
-  while (!isRowBegin(doc.lineAt(end).text)) {
+  while (end < doc.lineCount && !isRowBegin(doc.lineAt(end).text)) {
     end += 1
   }
   return new vscode.Range(doc.lineAt(begin).range.start, doc.lineAt(end - 1).range.end)
 }
 
-export class LanguageServer implements vscode.DocumentSemanticTokensProvider {
+interface TreeNode {
+  text: string
+}
+
+export class LanguageServer
+  implements vscode.DocumentSemanticTokensProvider, vscode.DocumentSymbolProvider
+{
+  provideDocumentSymbols(
+    document: vscode.TextDocument,
+    token: vscode.CancellationToken
+  ): vscode.ProviderResult<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
+    const result: vscode.DocumentSymbol[] = []
+
+    const file = document.getText()
+    const rows = file.split('\n')
+    let proc: vscode.DocumentSymbol | null = null
+    let threadTraceInfo: Record<
+      string,
+      {
+        root: vscode.DocumentSymbol
+        stack: [string, number, vscode.DocumentSymbol][]
+      }
+    > = {}
+    for (let i = 0; i < rows.length; i++) {
+      if (!isRowBegin(rows[i])) {
+        continue
+      }
+      const rowRange = getFullRow(document, i)
+      const row = document.getText(rowRange)
+      const info = parseRow(row)
+      if (!info) {
+        continue
+      }
+      if (row.endsWith(' MAA Process Start ')) {
+        const sym = new vscode.DocumentSymbol(
+          'process',
+          rows[i].slice(2, 18),
+          vscode.SymbolKind.Package,
+          new vscode.Range(i - 1, 0, i + 4, rows[i + 4].length),
+          document.lineAt(i - 1).range
+        )
+        proc = sym
+        sym.children = []
+        result.push(sym)
+        threadTraceInfo = {}
+      }
+      if (!proc) {
+        continue
+      }
+      if (!(info.tid in threadTraceInfo)) {
+        const sym = new vscode.DocumentSymbol(
+          info.tid,
+          '',
+          vscode.SymbolKind.Event,
+          document.lineAt(i).range,
+          document.lineAt(i).range
+        )
+        proc.children.push(sym)
+        threadTraceInfo[info.tid] = {
+          root: sym,
+          stack: []
+        }
+      }
+      const stk = threadTraceInfo[info.tid].stack
+      if (row.endsWith(' enter ')) {
+        if (info.tier !== 2) {
+          continue
+        }
+        const sym = new vscode.DocumentSymbol(
+          'func',
+          info.func,
+          vscode.SymbolKind.Function,
+          document.lineAt(i).range,
+          document.lineAt(i).range
+        )
+        sym.children = []
+        if (stk.length > 0) {
+          stk[stk.length - 1][2].children.push(sym)
+        } else {
+          threadTraceInfo[info.tid].root.children.push(sym)
+        }
+        stk.push([info.func, i, sym])
+      } else if (/leave, \d+ms $/.test(row)) {
+        if (stk.length === 0) {
+          continue
+        }
+        stk.pop()
+      }
+    }
+
+    return result
+  }
+
   onDidChangeSemanticTokens?: vscode.Event<void> | undefined
   provideDocumentSemanticTokens(
     document: vscode.TextDocument,
