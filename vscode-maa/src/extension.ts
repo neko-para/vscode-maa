@@ -9,7 +9,19 @@ export function activate(context: vscode.ExtensionContext) {
   // context.subscriptions.push(disposable)
   const documentSelector = [{ scheme: 'file', language: 'maalog' }]
   const lsp = new LanguageServer()
-  vscode.languages.registerDocumentSemanticTokensProvider(documentSelector, lsp, LanguageLegend)
+  context.subscriptions.push(
+    vscode.languages.registerDocumentSemanticTokensProvider(documentSelector, lsp, LanguageLegend)
+  )
+  context.subscriptions.push(
+    vscode.window.onDidChangeTextEditorSelection(event => {
+      if (
+        event.textEditor === vscode.window.activeTextEditor &&
+        event.textEditor.document.languageId === 'maalog'
+      ) {
+        lsp.onChangeSelection(event.textEditor, event.selections)
+      }
+    })
+  )
 }
 
 export function deactivate() {}

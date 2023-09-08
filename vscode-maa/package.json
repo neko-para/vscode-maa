@@ -15,6 +15,50 @@
   "main": "./out/extension.js",
   "contributes": {
     "commands": [],
+    "semanticTokenTypes": [
+      {
+        "id": "date",
+        "superType": "comment",
+        "description": "date"
+      },
+      {
+        "id": "source",
+        "superType": "namespace",
+        "description": "source"
+      },
+      {
+        "id": "debug",
+        "superType": "enum",
+        "description": "debug"
+      },
+      {
+        "id": "info",
+        "superType": "enum",
+        "description": "info"
+      },
+      {
+        "id": "warning",
+        "superType": "enum",
+        "description": "warning"
+      },
+      {
+        "id": "error",
+        "superType": "enum",
+        "description": "error"
+      }
+    ],
+    "configurationDefaults": {
+      "editor.semanticTokenColorCustomizations": {
+        "rules": {
+          "source": "#B58900",
+          "trace": "#A1A1A1",
+          "debug": "#A1A1A1",
+          "info": "#00A100",
+          "warning": "#A1A100",
+          "error": "#FF0000"
+        }
+      }
+    },
     "languages": [
       {
         "id": "maalog",
