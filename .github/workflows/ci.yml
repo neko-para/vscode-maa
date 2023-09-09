@@ -1,0 +1,33 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - 'main'
+
+  pull_request:
+    branches:
+      - 'main'
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+
+    steps:
+      # https://github.com/MaaAssistantArknights/MaaFramework/actions/runs/5643408179/job/15285186255
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: 'build'
+        run: |
+          npm ci
+          cd vscode-maa
+          npx vsce package
+          mv vscode-maa-*.vsix vscode-maa.vsix
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: vscode-maa
+          path: 'vscode-maa/vscode-maa.vsix'
