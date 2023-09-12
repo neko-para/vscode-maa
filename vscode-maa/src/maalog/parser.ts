@@ -1,6 +1,4 @@
-import * as vscode from 'vscode'
-
-import { ParseResult, R1, R2 } from './types'
+import { ParseResult } from './types'
 
 export function isRowBegin(row: string) {
   return /^ \[\d{4}-\d{2}-\d{2} /.test(row)

@@ -17,8 +17,8 @@ export type ValAndRanges<K extends string[], T extends Record<string, unknown> =
     : never
   : T
 
-export type R1 = ValAndRanges<['date', 'category', 'pid', 'tid', 'file']>
-export type R2 = ValAndRanges<['line', 'func']>
+type R1 = ValAndRanges<['date', 'category', 'pid', 'tid', 'file']>
+type R2 = ValAndRanges<['line', 'func']>
 
 export type ParseResult = ValAndRange<'rest'> &
   (

@@ -1,7 +1,6 @@
 import * as vscode from 'vscode'
 
 import { isRowBegin, parseRowInfo } from './parser'
-import { R1, R2 } from './types'
 
 const categoryMapper: Record<string, string> = {
   TRC: 'trace',
@@ -15,10 +14,6 @@ export const LanguageLegend = new vscode.SemanticTokensLegend(
   ['date', 'number', 'source', 'trace', 'debug', 'info', 'warning', 'error'],
   []
 )
-
-const deco = vscode.window.createTextEditorDecorationType({
-  textDecoration: 'underline'
-})
 
 function getFullRow(doc: vscode.TextDocument, row: number) {
   let begin = row,
@@ -35,6 +30,18 @@ function getFullRow(doc: vscode.TextDocument, row: number) {
 export class LanguageServer
   implements vscode.DocumentSemanticTokensProvider, vscode.DocumentSymbolProvider
 {
+  activeDecoration: vscode.TextEditorDecorationType
+
+  constructor() {
+    this.activeDecoration = vscode.window.createTextEditorDecorationType({
+      textDecoration: 'underline'
+    })
+  }
+
+  dispose() {
+    this.activeDecoration.dispose()
+  }
+
   provideDocumentSymbols(
     document: vscode.TextDocument,
     token: vscode.CancellationToken
@@ -200,13 +207,6 @@ export class LanguageServer
 
     return tokensBuilder.build()
   }
-  // provideDocumentSemanticTokensEdits?(
-  //   document: vscode.TextDocument,
-  //   previousResultId: string,
-  //   token: vscode.CancellationToken
-  // ): vscode.ProviderResult<vscode.SemanticTokens | vscode.SemanticTokensEdits> {
-  //   throw new Error('Method not implemented.')
-  // }
 
   onChangeSelection(editor: vscode.TextEditor, sel: readonly vscode.Selection[]) {
     if (sel.length === 0) {
@@ -214,6 +214,6 @@ export class LanguageServer
     }
     const pos = sel[0].active
     const range = getFullRow(editor.document, pos.line)
-    editor.setDecorations(deco, [range])
+    editor.setDecorations(this.activeDecoration, [range])
   }
 }
