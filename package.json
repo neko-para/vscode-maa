@@ -1,5 +1,8 @@
 {
   "name": "vscode-maa-monorepo",
+  "scripts": {
+    "dev": "cd vscode-maa && npm run watch"
+  },
   "workspaces": [
     "vscode-maa"
   ],

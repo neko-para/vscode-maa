@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 
 import { LanguageLegend, LanguageServer } from './maalog/language'
+import { activate as activateRes } from './maares'
 
 export function activate(context: vscode.ExtensionContext) {
   const documentSelector = [{ scheme: 'file', language: 'maalog' }]
@@ -20,6 +21,8 @@ export function activate(context: vscode.ExtensionContext) {
   )
   context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider(documentSelector, lsp))
   context.subscriptions.push(lsp)
+
+  activateRes(context)
 }
 
 export function deactivate() {}
